@@ -104,7 +104,7 @@ void loop() {
     //lcd.print(Tempo2-Tempo1);   
     
     Potencia=LCDMode(botaoMode,Fase,PinCorrente1,PinTensao1,Energia,ZeroTP1,ZeroTC1);
-    PotFase1=(int) Potencia;
+    PotFase1=arredonda(Potencia);
     i1=arredonda(RMS(1,PinCorrente1,1000,ZeroTC1));
     v1=arredonda(RMS(1,PinTensao1,1000,ZeroTP1));
     
@@ -112,13 +112,13 @@ void loop() {
   }
   if(Fase==1){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente2,PinTensao2,Energia,ZeroTP2,ZeroTC2);
-    PotFase2=(int) Potencia;
+    PotFase2=arredonda(Potencia);
     i2=arredonda(RMS(1,PinCorrente2,1000,ZeroTC2));
     v2=arredonda(RMS(1,PinTensao2,1000,ZeroTP2)); 
   }
   if(Fase==2){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente3,PinTensao3,Energia,ZeroTP3,ZeroTC3);
-    PotFase3=(int) Potencia;
+    PotFase3=arredonda(Potencia);
     i3=arredonda(RMS(1,PinCorrente3,1000,ZeroTC3));
     v3=arredonda(RMS(1,PinTensao3,1000,ZeroTP3));
   }
@@ -182,7 +182,7 @@ void loop() {
              Serial1.write('J');
              if(Serial1.available()>0)
             {
-             Serial1.write((int) Energia);}
+             Serial1.write(arredonda(Energia));}
 
 
               }
