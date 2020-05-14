@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 //#include <SoftwareSerial.h>
-#include <ArduinoJson.h>
+
 
 //SoftwareSerial s(PA3,PA2);
 
@@ -35,11 +35,15 @@ int PotFase1;
 int PotFase2;
 int PotFase3;
 int Potfin;
+int i1;
+int i2;
+int i3;
+int v1;
+int v2;
+int v3;
 unsigned long Tempo1;
 unsigned long Tempo2;
 unsigned long Tempo3;
-StaticJsonBuffer<1000> jsonBuffer;
-JsonObject& root = jsonBuffer.createObject();
 
 void setup() {
   
@@ -81,9 +85,7 @@ void setup() {
   //delay(1500);
   //lcd.print("Configurado!");
   //delay(1500);
-  root["PotFase1"]=0;
-  root["PotFase2"]=0;
-  root["PotFase3"]=0;
+  
 }
 
 
@@ -102,21 +104,30 @@ void loop() {
     //lcd.print(Tempo2-Tempo1);   
     
     Potencia=LCDMode(botaoMode,Fase,PinCorrente1,PinTensao1,Energia,ZeroTP1,ZeroTC1);
-    PotFase1=(int) Potencia;                               
+    PotFase1=(int) Potencia;
+    i1=arredonda(RMS(1,PinCorrente1,1000,ZeroTC1));
+    v1=arredonda(RMS(1,PinTensao1,1000,ZeroTP1));
+    
+                                  
   }
   if(Fase==1){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente2,PinTensao2,Energia,ZeroTP2,ZeroTC2);
-    PotFase2=(int) Potencia;   
+    PotFase2=(int) Potencia;
+    i2=arredonda(RMS(1,PinCorrente2,1000,ZeroTC2));
+    v2=arredonda(RMS(1,PinTensao2,1000,ZeroTP2)); 
   }
   if(Fase==2){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente3,PinTensao3,Energia,ZeroTP3,ZeroTC3);
-    PotFase3=(int) Potencia;   
+    PotFase3=(int) Potencia;
+    i3=arredonda(RMS(1,PinCorrente3,1000,ZeroTC3));
+    v3=arredonda(RMS(1,PinTensao3,1000,ZeroTP3));
   }
 
         
 
           
         if(Serial1.available()>0)      // comunicação serial com o ESP8266
+                                       //Cada letra tem um feature sendo enviado
             {
              
              Serial1.write('A');
@@ -134,6 +145,46 @@ void loop() {
              if(Serial1.available()>0)
             {
              Serial1.write(PotFase3);}
+
+             Serial1.write('D');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(i1);}
+
+             Serial1.write('E');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(v1);}
+
+
+             Serial1.write('F');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(i2);}
+
+             Serial1.write('G');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(v2);}
+
+
+             Serial1.write('H');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(i3);}
+
+
+             Serial1.write('I');
+             if(Serial1.available()>0)
+            {
+             Serial1.write(v3);}
+
+             Serial1.write('J');
+             if(Serial1.available()>0)
+            {
+             Serial1.write((int) Energia);}
+
+
               }
       
 
@@ -275,6 +326,10 @@ float FatordePotencia(const int pinEntrada1,const int pinEntrada2){     // Falta
        
 }
 
+int arredonda(float number)
+{
+    return (number >= 0) ? (int)(number + 0.5) : (int)(number - 0.5);
+}
 
 int ZeroADC(const int A){
       int i;
