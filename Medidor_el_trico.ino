@@ -77,7 +77,7 @@ void setup() {
   ZeroTP1=0;
   ZeroTP2=0;
   ZeroTP3=0;
-  ZeroTC1=0;
+  ZeroTC1=2048;
   ZeroTC2=0;
   ZeroTC3=0;
   //lcd.clear();
@@ -105,7 +105,7 @@ void loop() {
     
     Potencia=LCDMode(botaoMode,Fase,PinCorrente1,PinTensao1,Energia,ZeroTP1,ZeroTC1);
     PotFase1=arredonda(Potencia);
-    i1=arredonda(RMS(1,PinCorrente1,1000,ZeroTC1));
+    i1=arredonda(RMS(60.6,PinCorrente1,1000,ZeroTC1));
     v1=arredonda(RMS(1,PinTensao1,1000,ZeroTP1));
     
                                   
@@ -113,13 +113,13 @@ void loop() {
   if(Fase==1){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente2,PinTensao2,Energia,ZeroTP2,ZeroTC2);
     PotFase2=arredonda(Potencia);
-    i2=arredonda(RMS(1,PinCorrente2,1000,ZeroTC2));
+    i2=arredonda(RMS(60.6,PinCorrente2,1000,ZeroTC2));
     v2=arredonda(RMS(1,PinTensao2,1000,ZeroTP2)); 
   }
   if(Fase==2){
     Potencia=LCDMode(botaoMode,Fase,PinCorrente3,PinTensao3,Energia,ZeroTP3,ZeroTC3);
     PotFase3=arredonda(Potencia);
-    i3=arredonda(RMS(1,PinCorrente3,1000,ZeroTC3));
+    i3=arredonda(RMS(60.6,PinCorrente3,1000,ZeroTC3));
     v3=arredonda(RMS(1,PinTensao3,1000,ZeroTP3));
   }
 
@@ -199,7 +199,6 @@ void loop() {
           }
           else{
             botaoMode=0;
-            Energia=0;
             lcd.clear();
           }
           estadoAux=estado1;
@@ -238,7 +237,7 @@ void loop() {
 }
 
 
-float RMS(int constante, const int pinEntrada, int samples,int zero){
+float RMS(float constante, const int pinEntrada, int samples,int zero){
 
        int i;     // Calculo de RMS discreto para uma só variável. Usar constante para fazer a tranformação na medição elétrica
        float Valor;
@@ -246,16 +245,17 @@ float RMS(int constante, const int pinEntrada, int samples,int zero){
        for(i=0;i<samples;i++){
        
        //Valor = (3.3*analogRead(pinEntrada))/4096;// Usar constante aqui
-       Valor = (3.3*(analogRead(pinEntrada)-zero))/4096;
+       Valor = constante*(3.3*(analogRead(pinEntrada)-zero))/4096; // Para corrente Constante = 60.6
        Result=Valor*Valor+Result; 
        }
        Result=Result/samples;
        Result=sqrt(Result);
+       
 
 
        return Result;
 }
-float RMS_simultaneo(int constante1,int constante2,const int pinEntrada1,const int pinEntrada2,int samples,int mode){
+float RMS_simultaneo(float constante1,float constante2,const int pinEntrada1,const int pinEntrada2,int samples,int mode){
 
        int i;     // Calculo de RMS discreto ; constante1 e constante2 para transformação da tensao e corrente em valores reais
        float Valor1;
@@ -269,8 +269,8 @@ float RMS_simultaneo(int constante1,int constante2,const int pinEntrada1,const i
        Tempo1=micros();
        for(i=0;i<samples;i++){
        
-       Valor1 = (3.3*analogRead(pinEntrada1))/4096;   // usar constantes aqui, para transformar em valores reais.
-       Valor2 = (3.3*analogRead(pinEntrada2))/4096;   // mudar de acordo com o ADC 
+       Valor1 = constante1*(3.3*analogRead(pinEntrada1))/4096;   // usar constantes aqui, para transformar em valores reais.
+       Valor2 = constante2*(3.3*analogRead(pinEntrada2))/4096;   // mudar de acordo com o ADC 
        Result1=Valor1*Valor1+Result1; 
        Result2=Valor2*Valor2+Result2;
        }
@@ -349,7 +349,7 @@ float LCDMode(int botao,int fase, const int pinI,const int pinV,float E,int zero
       float V;
       float I;
       float P;
-      P=RMS_simultaneo(1,1,pinV,pinI,1000,1); //Calculo da potencia.
+      P=RMS_simultaneo(1,60.6,pinV,pinI,1000,1); //Calculo da potencia.
       
 
       
@@ -390,14 +390,14 @@ float LCDMode(int botao,int fase, const int pinI,const int pinV,float E,int zero
        lcd.print("B:"); //Print
        lcd.setCursor(7, 1);
        lcd.print("C:");
-       I=RMS(1,pinI,1000,zeroI);
+       I=RMS(60.6,pinI,1000,zeroI);
        lcd.setCursor(a,b);
        lcd.print(I,2); 
     }
     if(botao==2){ // Potencia instantanea
        
        lcd.setCursor(0, 0); //elemento 1x1
-       lcd.print("Pot(Kw)A:"); //Print 
+       lcd.print("Pot(kW)A:"); //Print 
        lcd.setCursor(0, 1); //elemento 1x2
        lcd.print("B:"); //Print
        lcd.setCursor(7, 1);
@@ -409,7 +409,7 @@ float LCDMode(int botao,int fase, const int pinI,const int pinV,float E,int zero
        
        
        lcd.setCursor(0, 0); //elemento 1x1
-       lcd.print("E(KWh):"); //Print 
+       lcd.print("E(kWh):"); //Print 
        lcd.setCursor(0, 1); //elemento 1x2
        lcd.print("Preco:"); //Print
        lcd.setCursor(6, 1);
