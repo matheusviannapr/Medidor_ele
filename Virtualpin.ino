@@ -1,43 +1,12 @@
-/*************************************************************
-  Download latest Blynk library here:
-    https://github.com/blynkkk/blynk-library/releases/latest
-
-  Blynk is a platform with iOS and Android apps to control
-  Arduino, Raspberry Pi and the likes over the Internet.
-  You can easily build graphic interfaces for all your
-  projects by simply dragging and dropping widgets.
-
-    Downloads, docs, tutorials: http://www.blynk.cc
-    Sketch generator:           http://examples.blynk.cc
-    Blynk community:            http://community.blynk.cc
-    Follow us:                  http://www.fb.com/blynkapp
-                                http://twitter.com/blynk_app
-
-  Blynk library is licensed under MIT license
-  This example code is in public domain.
-
- *************************************************************
-
-  This example shows how value can be pushed from Arduino to
-  the Blynk App.
-
-  NOTE:
-  BlynkTimer provides SimpleTimer functionality:
-    http://playground.arduino.cc/Code/SimpleTimer
-
-  App project setup:
-    Value Display widget attached to Virtual Pin V5
- *************************************************************/
-
-/* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
-
-
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include <ArduinoJson.h>
 #include <SoftwareSerial.h>
-SoftwareSerial s(D6,D5);
+SoftwareSerial s(3,1);
+
+//TX RX como serial.
+//LEMBRAR DE LIGAR OS TERRAS JUNTOS.
 
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
@@ -47,10 +16,24 @@ char auth[] = "EBzOKyeWePRCay5fP8tY-eMnQVQmY0x5";
 // Set password to "" for open networks.
 char ssid[] = "motorolaone";
 char pass[] = "batata12";
+WidgetLCD lcd(V10);
 int value;
-float PotFase1;
-float PotFase2;
-float PotFase3;
+String PotFase1;
+String PotFase2;
+String PotFase3;
+int Pot1;
+int Pot2;
+int Pot3;
+int i1;
+int i2;
+int i3;
+int v1;
+int v2;
+int v3;
+int Energia;
+float Preco;
+int PotAux;
+char serialRead;
 BlynkTimer timer;
 
 // This function sends Arduino's up time every second to Virtual Pin (5).
@@ -59,17 +42,40 @@ BlynkTimer timer;
 
   
 void myTimerEvent()
-{
-  StaticJsonBuffer<1000> jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(s);
-  PotFase1=root["PotFase1"];
-  PotFase2=root["PotFase2"];
-  PotFase3=root["PotFase3"];
+{ 
+
+ 
+  Blynk.virtualWrite(V1,Pot1);
+  delay(50);
+  Blynk.virtualWrite(V2,Pot2);
+  delay(50);
+  Blynk.virtualWrite(V3,Pot3);
+  delay(50);
+  Blynk.virtualWrite(V4,v1);
+  delay(50);
+  Blynk.virtualWrite(V5,i1);
+  delay(50);
+  Blynk.virtualWrite(V6,v2);
+  delay(50);
+  Blynk.virtualWrite(V7,i2);
+  delay(50);
+  Blynk.virtualWrite(V8,v3);
+  delay(50);
+  Blynk.virtualWrite(V9,i3);
+  delay(50);
   
-  Blynk.virtualWrite(V1,PotFase1);
-  Blynk.virtualWrite(V2,PotFase1);
-  Blynk.virtualWrite(V3,PotFase1);
+  lcd.clear();
+  lcd.print(0, 0,"Energia:"); 
+  lcd.print(8, 0, Energia);                 
+  lcd.print(0, 1, "Preco:");
+  Preco=0.5*Energia;
+  lcd.print(6, 1, Preco); 
   
+  
+  
+  
+  
+
   // You can send any value at any time.
   // Please don't send more that 10 values per second.
 }
@@ -79,19 +85,92 @@ void setup()
   // Debug console
   Serial.begin(9600);
   s.begin(9600);
-  pinMode(A0,INPUT);
+  while (!Serial) continue;
   Blynk.begin(auth, ssid, pass);
-  // You can also specify server:
-  //Blynk.begin(auth, ssid, pass, "blynk-cloud.com", 80);
-  //Blynk.begin(auth, ssid, pass, IPAddress(192,168,1,100), 8080);
-
-  // Setup a function to be called every second
   timer.setInterval(1000L, myTimerEvent);
 }
 
 void loop()
-{
+{ 
+  s.write("s");
+  if (s.available()>0)
+  {
+   serialRead = s.read();
+   if (serialRead == 'A'){
+      s.write("s");
+     PotAux=s.read();
+     if(PotAux>=0){
+      Pot1=PotAux;}
+   }
+   if (serialRead == 'B'){
+      s.write("s");
+     PotAux=s.read();
+     if(PotAux>=0){
+      Pot2=PotAux;}
+   }
+
+   if (serialRead == 'C'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      Pot3=PotAux;}
+   }
+
+   if (serialRead == 'D'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      i1=PotAux;}
+   }
+
+  if (serialRead == 'E'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      v1=PotAux;}
+   }
+
+   if (serialRead == 'F'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      i2=PotAux;}
+   }
+
+   if (serialRead == 'G'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      v2=PotAux;}
+   }
+
+
+   if (serialRead == 'H'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      i3=PotAux;}
+   }
+
+   if (serialRead == 'I'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      v3=PotAux;}
+   }
+   
+   if (serialRead == 'J'){
+      s.write("s");
+      PotAux=s.read();
+     if(PotAux>=0){
+      Energia=PotAux;}
+   }
+ 
+   
+  }
   
+ 
+
   Blynk.run();
   timer.run(); // Initiates BlynkTimer
 }
